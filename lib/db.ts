@@ -6,8 +6,12 @@ const globalForDb = globalThis as unknown as { sqlClient?: postgres.Sql };
 
 function client(): postgres.Sql {
   if (globalForDb.sqlClient) return globalForDb.sqlClient;
-  const url = process.env.DATABASE_URL;
-  if (!url) throw new Error("DATABASE_URL is not set. Copy .env.example to .env.local and fill it in.");
+  const raw = process.env.DATABASE_URL;
+  if (!raw) throw new Error("DATABASE_URL is not set. Copy .env.example to .env.local and fill it in.");
+  // Neon adds channel_binding=require, which postgres.js would forward to the server as an unknown setting.
+  const parsed = new URL(raw);
+  parsed.searchParams.delete("channel_binding");
+  const url = parsed.toString();
   const isLocal = /localhost|127\.0\.0\.1/.test(url);
   globalForDb.sqlClient = postgres(url, {
     ssl: isLocal ? false : "require",
