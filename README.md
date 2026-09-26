@@ -4,7 +4,7 @@ A shop where nothing is restocked. Objects are released at a set hour in small, 
 
 This started as an Amazon rebuild. For round two I kept the idea (an online store) and the goal of real shopping flows. I rebuilt the frontend with my own concept and visual design, and replaced the hardcoded product file with a real Postgres backend.
 
-**Live:** _add your Vercel URL_ · **Health check:** `/api/health`
+**Live:** https://once-drops.vercel.app · **Health check:** https://once-drops.vercel.app/api/health
 
 ## Why this idea
 
@@ -63,6 +63,7 @@ components/         UI
 npm install
 cp .env.example .env.local        # put your Postgres URL in DATABASE_URL
 npm run db:setup                  # creates tables and seeds drops
+# or, with no terminal: paste db/seed.sql into the Neon SQL Editor and run it
 npm run dev
 ```
 
