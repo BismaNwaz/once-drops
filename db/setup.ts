@@ -7,7 +7,7 @@ import postgres from "postgres";
 import bcrypt from "bcryptjs";
 import { seedDrops } from "./drops";
 
-const url = process.env.DATABASE_URL;
+const url = process.env.DATABASE_URL?.replace(/[?&]channel_binding=[^&]*/, "");
 if (!url) {
   console.error("DATABASE_URL is not set");
   process.exit(1);
