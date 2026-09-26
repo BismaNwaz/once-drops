@@ -46,3 +46,21 @@
 - **Race test:** 20 simultaneous hold requests for the last 16 pieces → exactly 16 held, 12 clean `409` responses, no overselling.
 - Playwright walkthrough (desktop and 390 px mobile): home → drop → reserve → bag → sign in → checkout → certificate → collection. No hydration errors (an earlier one from locale dates was fixed) and no horizontal scroll on mobile.
 - Checked that every Unsplash image ID resolves (a fake ID returns 404 as a control).
+
+---
+
+## Prompts 6–14: Deploying to Vercel and Neon
+
+> Pushed the code to github.com/BismaNwaz/once-drops (the repo was private at first; made it public). Imported it into Vercel and asked for help connecting the database.
+
+**Problems found and fixed with the agent:**
+1. **Wrong `DATABASE_URL` in Vercel.** The value was the `localhost` placeholder from `.env.example`, so production answered 500/503. I replaced it with Neon's pooled connection string.
+2. **Neon's Vercel integration defaulted to the `STORAGE_URL` prefix.** Changed the prefix to `DATABASE` so the app finds `DATABASE_URL`.
+3. **`channel_binding=require` breaks postgres.js.** The agent reproduced it locally (`unrecognized configuration parameter "channel_binding"`) and fixed `lib/db.ts` (and `db/setup.ts`) to remove that parameter before connecting. Committed as "fix".
+4. **"Invalid URL" after the fix.** The variable had been pasted with extra characters. Re-pasted it as the bare connection string and redeployed.
+5. **Seeding without a terminal.** The agent generated `db/seed.sql` (schema plus 12 drops, with times relative to `now()`, safe to re-run), and I ran it in the Neon SQL Editor.
+
+**Verification on the live site (run by the agent in the browser):**
+- `/api/health` → `ok: true`, 12 drops, about 4 ms database latency. All 12 product images load.
+- Guest hold → upcoming drop refused → guest checkout blocked (401) → one-click guest account → the hold moves to the account → checkout returns order ONC-5C94D78 with edition Nº 31 → order history → waitlist → every page returns 200 and an unknown page returns 404.
+- Re-ran the seed to clear the test order and restart the countdowns before recording.
